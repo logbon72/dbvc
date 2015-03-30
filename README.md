@@ -1,4 +1,4 @@
-# DBVC: Database Version Control #
+ï»¿# DBVC: Database Version Control #
 
 DBVC was inspired by http://dbv.vizuina.com/, it uses some of the core classes used by DBV. However, unlike DBV, DBVC 
 
@@ -73,15 +73,15 @@ Revision files should be named in the format {version_number}_version_descriptio
 
 ## Applying Changes to DB ##
 
-To prevent errors, it is advisable that you don’t use any MySQL client to apply the changes to the DB, only this script should be used to alter structure of DB objects. You should use the client to generate the change query, put the query in the revision file, then run migration script, that way, you are sure that the migration file for tracking applied migrations has been successfully updated.
+To prevent errors, it is advisable that you don't use any MySQL client to apply the changes to the DB, only this script should be used to alter structure of DB objects. You should use the client to generate the change query, put the query in the revision file, then run migration script, that way, you are sure that the migration file for tracking applied migrations has been successfully updated.
 
 ## Version Conflicts ##
 Before creating version files, it is advisable to first pull from the upstream so as to have the latest DB changes, this will save you the stress of having to deal with duplicate version ID. In the event of duplicate version ID, the version that already exists in the repository wins, the puller should revert changes made by his revision file, and also delete the changes from the migration store table. 
 
-So if in the previous example, you pull and discover there’s already another file called  /dbvc/revisions/default/11_another_change.sql, then you should do the following:
-If you’ve not run the migration script, rename your migration file from 12_added_email2_to_users.sql, that is also assuming there was no version 11 when you pulled. Then run the migration script. 
+So if in the previous example, you pull and discover there's already another file called  /dbvc/revisions/default/11_another_change.sql, then you should do the following:
+If you've not run the migration script, rename your migration file from 12_added_email2_to_users.sql, that is also assuming there was no version 11 when you pulled. Then run the migration script. 
 
-It is advisable that you push your migration scripts immediately you’ve applied them. You can push only the revision files to the upstream if you’re sure that the changes made will not break existing code. If your revisions will break existing code, then you should push your entire repo when ready, note that, the longer you wait, the more likely you are to experience version conflicts.
+It is advisable that you push your migration scripts immediately you've applied them. You can push only the revision files to the upstream if you're sure that the changes made will not break existing code. If your revisions will break existing code, then you should push your entire repo when ready, note that, the longer you wait, the more likely you are to experience version conflicts.
 
 ## Rolling Back Changes ##
 MySQL and some other DBMS do not support roll-back of DDL queries, hence changes made to DB structure cannot be reverted automatically. If you made a change in a revision and you discover that this is not a change you want, then you should create another revision file to revert that change.

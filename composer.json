@@ -1,0 +1,11 @@
+{
+    "name": "intelworx/dbvc",
+    "description": "DBVC: Database Version Control, inspired by http://dbv.vizuina.com/ and FlywayDB for Java.",
+    "authors": [
+        {
+            "name": "Joseph T. Orilogbon",
+            "email": "joseph@orilogbon.me"
+        }
+    ],
+    "require": {}
+}
