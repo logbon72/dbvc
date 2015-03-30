@@ -7,5 +7,10 @@
             "email": "joseph@orilogbon.me"
         }
     ],
-    "require": {}
+    "require": {},
+	"autoload":{
+	"psr-4":{
+		"intelworx\\dbvc\\":""
+	}
+}
 }
