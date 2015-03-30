@@ -83,15 +83,15 @@ class DBMigration {
         return $this;
     }
 
-    public function runMigration($mode = DBMigrationMode::NON_INTERACTIVE, $startVersion = 0) {
+    public function runMigration($mode = DBMigrationMode::NON_INTERACTIVE, $baseVersion = 0) {
         //load revisions from directory...
         self::el('Loading applied revisions...');
         $this->loadAppliedRevisions();
         self::el('Total revisions loaded: ', count($this->appliedRevisions));
         self::el('DB currently at version : ', $this->maxRevision, PHP_EOL);
         self::el('Loading new revisions from filesystem');
-        if ($this->maxRevision < $startVersion) {
-            $this->maxRevision = $startVersion;
+        if ($this->maxRevision < $baseVersion) {
+            $this->maxRevision = $baseVersion;
             self::el('Migration will be started at version : ', $this->maxRevision, PHP_EOL);
         }
 
