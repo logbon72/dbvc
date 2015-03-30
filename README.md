@@ -88,5 +88,5 @@ MySQL and some other DBMS do not support roll-back of DDL queries, hence changes
 
 # License #
 
-**Free for all**
+*Free for all*
 
