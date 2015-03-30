@@ -277,7 +277,7 @@ class DBMigration {
      */
     protected function _getAdapter() {
         if (!$this->_adapter) {
-            $file = 'adapters' . DS . strtolower($this->dbConfig['adapter']) . '.php';
+            $file = __DIR__ . DS . 'adapters' . DS . strtolower($this->dbConfig['adapter']) . '.php';
             if (file_exists($file)) {
                 require_once $file;
 

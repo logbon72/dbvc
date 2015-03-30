@@ -1,13 +1,10 @@
 <?php
 
 //load dbvc classes
-require_once 'dbvc.php';
+require_once '../dbvc.php';
 
 use intelworx\dbvc\DBMigration;
 use intelworx\dbvc\DBMigrationMode;
-
-$cwd = getcwd();
-chdir(__DIR__);
 
 $dbConfig = array(
     'adapter' => 'MySQL', //this is the only adapter implemented for now
@@ -54,8 +51,6 @@ try {
     DBMigration::el('Cannot continue, an exception occured', $e);
     $status = -1;
 }
-
-chdir($cwd);
 
 //
 if (isset($_SERVER['REQUEST_URI'])) {
