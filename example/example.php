@@ -39,7 +39,7 @@ DBMigration::el('Starting migration');
 try {
 
     //the directory with revisions.
-    $revisionsDirectory = __DIR__ . '/example';
+    $revisionsDirectory = __DIR__ . '/revisions';
 
     //migration object must be initiated with this directory
     $migration = new DBMigration($revisionsDirectory);
