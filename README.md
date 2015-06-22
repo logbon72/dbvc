@@ -93,6 +93,10 @@ When this option is set to true, all revisions that have not yet been applied, w
 ## Rolling Back Changes ##
 MySQL and some other DBMS do not support roll-back of DDL queries, hence changes made to DB structure cannot be reverted automatically. If you made a change in a revision and you discover that this is not a change you want, then you should create another revision file to revert that change.
 
+## Dealing with Line Endings ##
+
+DBVC is immune to changes in line ending formats, the file checksum checker will assume all possible line-ending formats when checking if a file still matches a stored revision. Please note that this only covers the following line endings: `CR`, `LF`, `CRLF` 
+
 # License #
 
-*Free for all*
+The MIT License (MIT)

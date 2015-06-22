@@ -1,7 +1,7 @@
 <?php
 
 //load dbvc classes
-require_once '../dbvc.php';
+require_once __DIR__ . '/../dbvc.php';
 
 use intelworx\dbvc\DBMigration;
 use intelworx\dbvc\DBMigrationMode;

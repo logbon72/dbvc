@@ -7,7 +7,7 @@ namespace intelworx\dbvc;
  *
  * @author JosephT
  */
-class DBMigrationRevision {
+abstract class DBMigrationRevision {
 
     protected $id;
     protected $title;
@@ -41,10 +41,6 @@ class DBMigrationRevision {
         return $this->checksum;
     }
 
-    public function equals(DBMigrationRevision $revision) {
-        return $this->file === $revision->file && $this->checksum === $revision->checksum;
-    }
-
     public function __toString() {
         return '[' . $this->file . ':md5:' . $this->checksum . ']';
     }
@@ -56,17 +52,17 @@ class DBMigrationRevision {
     /**
      * 
      * @param array $line
-     * @return \DBMigrationRevision
+     * @return DBMigrationRevisionStored
      */
     public static function fromLine($line) {
         //$id, $file, $checksum, $file = null
-        return new DBMigrationRevision($line[0], $line[1], $line[2], $line[3]);
+        return new DBMigrationRevisionStored($line[0], $line[1], $line[2], $line[3]);
     }
 
     /**
      * Creates revision object from a file name.
-     * @param type $file
-     * @return null|\DBMigrationRevision
+     * @param string $file
+     * @return null|DBMigrationRevisionFile
      */
     public static function fromFile($file) {
         $baseName = basename($file);
@@ -79,11 +75,53 @@ class DBMigrationRevision {
         $version = $matches[1];
         $description = preg_replace('/[^a-zA-Z0-9]+/', ' ', $matches[2]);
 
-        return new DBMigrationRevision($version, $baseName, self::computeChecksum($file), $description);
+        return new DBMigrationRevisionFile($version, $baseName, self::computeChecksum($file), $description, file_get_contents($file));
     }
 
+    /**
+     * Computes checksum of a file
+     * @param string $file the path to the file
+     * @return string
+     */
     public static function computeChecksum($file) {
         return md5_file($file);
     }
 
+}
+
+class DBMigrationRevisionFile extends DBMigrationRevision {
+
+    private $baseChecksum;
+
+    public function __construct($id, $file, $checksum, $title = null, $content = '') {
+        parent::__construct($id, $file, $checksum, $title);
+        $this->baseChecksum = self::computeBaseChecksum($content);
+    }
+
+    public function matches(DBMigrationRevisionStored $storedRevision) {
+        return $this->file === $storedRevision->file &&
+                ($this->checksum === $storedRevision->checksum || in_array($storedRevision->checksum, $this->baseChecksum));
+    }
+
+    /**
+     * Computes checksums without Line ending complications.
+     * @param string $content content of the original file.
+     * @return string
+     */
+    public static function computeBaseChecksum($content) {
+        static $eol = '/\r\n|\r|\n/';
+
+        $checksums = array();
+        //covert to linux EOL
+        $checksums[] = md5(preg_replace($eol, "\n", $content));
+        $checksums[] = md5(preg_replace($eol, "\r\n", $content));
+        $checksums[] = md5(preg_replace($eol, "\r", $content));
+
+        return $checksums;
+    }
+
+}
+
+class DBMigrationRevisionStored extends DBMigrationRevision {
+    
 }

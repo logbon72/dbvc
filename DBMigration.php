@@ -204,9 +204,9 @@ class DBMigration {
             if (!file_exists($path)) {
                 throw new DBMigrationException("Applied migration at version {$revision->getVersionId()}, {$revision->getFile()} was not found");
             } else {
-                $fileChecksum = DBMigrationRevision::computeChecksum($path);
-                if ($fileChecksum !== $revision->getChecksum()) {
-                    throw new DBMigrationException("Applied migration is no longer valid, applied migration at Version {$revision->getVersionId()} = {$revision->getChecksum()} ; Revision File = {$fileChecksum}");
+                $fileRevision = DBMigrationRevision::fromFile($path);
+                if (!$fileRevision->matches($revision)) {
+                    throw new DBMigrationException("Applied migration is no longer valid, at Version {$revision->getVersionId()} Applied Revision = {$revision} ; Revision File = {$fileRevision}");
                 }
             }
             $this->appliedRevisions[$revision->getVersionId()] = $revision;
@@ -249,8 +249,10 @@ class DBMigration {
                 if (array_key_exists($version, $this->appliedRevisions)) {
                     //checks...
                     $storedRevision = $this->appliedRevisions[$version];
-                    if (!$storedRevision->equals($aRevision)) {
-                        throw new DBMigrationException("Applied migration is no longer valid, applied migration at Version {$version} = {$storedRevision} ; Revision File = {$aRevision}");
+                    if (!$aRevision->matches($storedRevision)) {
+                        throw new DBMigrationException("Applied migration is no longer valid,\n"
+                                . "\tApplied Revision at Version {$version} : {$storedRevision};\n"
+                                . "\tRevision File = {$aRevision}");
                     }
                 } else {
                     $add = ($outOfOrder && $version > $baseVersion && !$this->isApplied($aRevision) && !$this->isBad($aRevision)) //out of order and version is unapplied.
