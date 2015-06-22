@@ -3,7 +3,7 @@
 DBVC was inspired by http://dbv.vizuina.com/, it uses some of the core classes used by DBV. However, unlike DBV, DBVC 
 
 - was designed to work on CLI 
-- was designed for revisions to be applied in a forward mode only.
+- was designed for revisions to be applied in a forward mode only, but can also work out-of-order.
 - was designed to work similar to Flyway DB migration (http://flywaydb.org)
 
 DBMigration can be used in 3 modes, all defined in DBMigrationMode class
@@ -15,7 +15,7 @@ DBMigration can be used in 3 modes, all defined in DBMigrationMode class
 # Using DBMigration #
 The migration script can be run using the following command: 
 
-```
+```php
 #!php
 
 require_once /path/to/dbvc/dbvc.php;
@@ -46,8 +46,10 @@ $mode = DBMigrationMode::INTERACTIVE;
 //version to start from, useful, when you wish to jump versions
 $startVersion = 0;
 
+$outOfOrder = true;
+
 //run migration, throws DBMigrationException on error.
-$migration->runMigration($mode, $startVersion);
+$migration->runMigration($mode, $startVersion, $outOfOrder);
 
 ```
 
@@ -83,10 +85,12 @@ If you've not run the migration script, rename your migration file from 12_added
 
 It is advisable that you push your migration scripts immediately you've applied them. You can push only the revision files to the upstream if you're sure that the changes made will not break existing code. If your revisions will break existing code, then you should push your entire repo when ready, note that, the longer you wait, the more likely you are to experience version conflicts.
 
+## Out-of-Order Migration##
+When this option is set to true, all revisions that have not yet been applied, will be applied, this changes the way DBVC works normally and has the advantage that teams which use feature branches can easily merge their work together and apply all changes, using the out-of-order mechanism. In such cases, it is advisable that each branch has its own revision range, e.g. 0 - 1000 for master branch, 1001 - 1100 for feature x, and so on.
+
 ## Rolling Back Changes ##
 MySQL and some other DBMS do not support roll-back of DDL queries, hence changes made to DB structure cannot be reverted automatically. If you made a change in a revision and you discover that this is not a change you want, then you should create another revision file to revert that change.
 
 # License #
 
 *Free for all*
-
