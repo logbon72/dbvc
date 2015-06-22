@@ -15,7 +15,7 @@ DBMigration can be used in 3 modes, all defined in DBMigrationMode class
 # Using DBMigration #
 The migration script can be run using the following command: 
 
-```
+```php
 #!php
 
 require_once /path/to/dbvc/dbvc.php;
