@@ -1,10 +1,12 @@
-﻿# DBVC: Database Version Control #
+# DBVC: Database Version Control in PHP #
 
 DBVC was inspired by http://dbv.vizuina.com/, it uses some of the core classes used by DBV. However, unlike DBV, DBVC 
 
 - was designed to work on CLI 
 - was designed for revisions to be applied in a forward mode only, but can also work out-of-order.
 - was designed to work similar to Flyway DB migration (http://flywaydb.org)
+
+DBVC is written in PHP so, it will fit in your PHP scripts freely, although you can also easily use it within your other projects.
 
 DBMigration can be used in 3 modes, all defined in DBMigrationMode class
 
