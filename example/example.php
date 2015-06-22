@@ -45,7 +45,7 @@ try {
     $migration->setDbConfig($dbConfig);
 
     DBMigration::el('Start version : ', $startVersion);
-    $migration->runMigration($mode, $startVersion);
+    $migration->runMigration($mode, $startVersion, true);
     $status = 0;
 } catch (Exception $e) {
     DBMigration::el('Cannot continue, an exception occured', $e);

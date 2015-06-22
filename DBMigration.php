@@ -83,19 +83,21 @@ class DBMigration {
         return $this;
     }
 
-    public function runMigration($mode = DBMigrationMode::NON_INTERACTIVE, $startVersion = 0) {
+    public function runMigration($mode = DBMigrationMode::NON_INTERACTIVE, $baseVersion = 0, $outOfOrder = false) {
         //load revisions from directory...
         self::el('Loading applied revisions...');
         $this->loadAppliedRevisions();
         self::el('Total revisions loaded: ', count($this->appliedRevisions));
         self::el('DB currently at version : ', $this->maxRevision, PHP_EOL);
         self::el('Loading new revisions from filesystem');
-        if ($this->maxRevision < $startVersion) {
-            $this->maxRevision = $startVersion;
-            self::el('Migration will be started at version : ', $this->maxRevision, PHP_EOL);
-        }
 
-        $this->loadNewRevisions();
+        if ($this->maxRevision < $baseVersion) {
+            $this->maxRevision = $baseVersion;
+        }
+        
+        self::el('Migration will be started at version : ', $this->maxRevision, PHP_EOL);
+
+        $this->loadNewRevisions($outOfOrder, $baseVersion);
 
         self::el('Loaded', count($this->newRevisions), 'revision(s)');
         self::el('Target Schema Version : ', $this->latestRevision);
@@ -140,9 +142,10 @@ class DBMigration {
 
         $adapter = $this->_getAdapter();
         $lastVersion = $this->maxRevision;
+
         foreach ($this->newRevisions as $revision) {
-            if (!in_array($revision->getVersionId(), $this->badRevisions)) {
-                self::el('Migrating from ', $lastVersion, 'to', $revision->getVersionId(), ': ', $revision->getTitle());
+            if (!$this->isBad($revision)) {
+                self::el('Applying revision ', $revision->getVersionId(), ': ', $revision->getTitle());
                 $queries = $this->getContent($revision);
                 $adapter->query($queries);
                 self::el('Successfully applied');
@@ -153,6 +156,7 @@ class DBMigration {
 
             $lastVersion = $revision->getVersionId();
         }
+
         self::el('Successfully migrated DB to version : ', $lastVersion);
     }
 
@@ -234,8 +238,9 @@ class DBMigration {
         return $q . join(', ', $values);
     }
 
-    protected function loadNewRevisions() {
+    protected function loadNewRevisions($outOfOrder = false, $baseVersion = 0) {
         $files = glob($this->revisionsDir . DIRECTORY_SEPARATOR . '*.sql');
+
         foreach ($files as $aFile) {
             $aRevision = DBMigrationRevision::fromFile($aFile);
             if ($aRevision) {
@@ -248,7 +253,9 @@ class DBMigration {
                         throw new DBMigrationException("Applied migration is no longer valid, applied migration at Version {$version} = {$storedRevision} ; Revision File = {$aRevision}");
                     }
                 } else {
-                    if ($aRevision->getVersionId() > $this->maxRevision) {
+                    $add = ($outOfOrder && $version > $baseVersion && !$this->isApplied($aRevision) && !$this->isBad($aRevision)) //out of order and version is unapplied.
+                            || $aRevision->getVersionId() > $this->maxRevision;
+                    if ($add) {
                         //check if version has been loaded, throw exception on duplicate
                         if (array_key_exists($version, $this->newRevisions)) {
                             $existing = $this->newRevisions[$version];
@@ -264,11 +271,30 @@ class DBMigration {
         if (!empty($this->newRevisions)) {
             ksort($this->newRevisions, SORT_NUMERIC);
             $firstNewVersion = current($this->newRevisions)->getVersionId();
-            if (($firstNewVersion - $this->maxRevision) > 1) {
+            if (($firstNewVersion - $this->maxRevision) > 1 && !$outOfOrder) {
                 self::el('WARNING!!!', 'Versions might be missing', $this->maxRevision, ' Jumps to ', $firstNewVersion);
             }
             $this->latestRevision = end($this->newRevisions)->getVersionId();
         }
+    }
+
+    /**
+     * 
+     * Checks if a revision is listed in bad revisions.
+     * @param \intelworx\dbvc\DBMigrationRevision $revision
+     * @return boolean
+     */
+    public function isBad(DBMigrationRevision $revision) {
+        return in_array($revision->getVersionId(), $this->badRevisions);
+    }
+
+    /**
+     * Checks if a revision has been applied or not.
+     * @param \intelworx\dbvc\DBMigrationRevision $revision
+     * @return boolean
+     */
+    public function isApplied(DBMigrationRevision $revision) {
+        return array_key_exists($revision->getVersionId(), $this->appliedRevisions);
     }
 
     /**
